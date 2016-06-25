@@ -1,7 +1,7 @@
 #include "Model.h"
 
-Model::Model(std::vector<VertexAttribute> vertexSpec, float * vertices, size_t numVertices)
-	: vertexSpec_(std::move(vertexSpec)), vertices_(vertices), numVerts_(numVertices), vertexSize_(0)
+Model::Model(char const* texture, std::vector<VertexAttribute> vertexSpec, float const* vertices, size_t numVertices)
+	: vertexSpec_(std::move(vertexSpec)), numVerts_(numVertices), vertexSize_(0)
 {
 	// Calculate the size of a vertex (not going to handle every single case since I'm not using most of them
 	for (auto& attr : vertexSpec_) {
@@ -21,6 +21,9 @@ Model::Model(std::vector<VertexAttribute> vertexSpec, float * vertices, size_t n
 			break;
 		}
 	}
+
+	vertices_ = new float[numVerts_];
+	std::copy(vertices, vertices + numVerts_, vertices_);
 }
 
 Model::Model(const Model & other)

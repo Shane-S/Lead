@@ -10,11 +10,13 @@ public:
 
 	/**
 	 * Creates a new 3D model with the specified vertex format and vertices.
+	 * @param texture     The path to the texture to load with this model.
 	 * @param vertexSpec  A list of vertex attributes describing the memory layout of each vertex.
-	 * @param vertices    The list of vertices making up this model. The model will free this on destruction.
+	 * @param vertices    The list of vertices making up this model (which will be copied).
 	 * @param numVertices The number of vertices in the list.
+	 * @param copyVerts   Whether to copy the vertices from the given list (false by default; set to true if vertices wasn't 
 	 */
-	Model(std::vector<VertexAttribute> vertexSpec, float* vertices, size_t numVertices);
+	Model(char const* texture, std::vector<VertexAttribute> vertexSpec, float const* vertices, size_t numVertices);
 
 	Model(const Model& other);
 	Model(Model&& other);

@@ -67,7 +67,9 @@ int main(int argc, char **argv) {
 		lastTicks = currentTicks;
 	}
 
+	TwTerminate();
 	SDL_DestroyWindow(window);
 	SDL_GL_DeleteContext(context);
+	SDL_Quit();
     return 0;
 }

@@ -30,5 +30,6 @@ public:
 private:
 	std::vector<Model> models_;
 	std::map<std::string, Shader> shaders_;
+	int test;
 	TwBar* tweakBar_;
 };

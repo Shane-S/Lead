@@ -8,7 +8,8 @@ set(HEADERS ${INCLUDE_DIR}/Camera.h
             ${INCLUDE_DIR}/Scene.h
 			${INCLUDE_DIR}/Shader.h
             ${INCLUDE_DIR}/Model.h
-            ${INCLUDE_DIR}/TestModelVerts.h)
+            ${INCLUDE_DIR}/TestModelVerts.h
+			${INCLUDE_DIR}/Utils.h)
 
 set(SOURCES Camera.cpp
             GLProgramUtils.cpp
@@ -16,6 +17,7 @@ set(SOURCES Camera.cpp
 			Shader.cpp
             Model.cpp
             TestModelVerts.cpp
+			Utils.cpp
             main.cpp)
 
 find_package(AntTweakBar REQUIRED)
