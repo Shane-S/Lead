@@ -82,7 +82,7 @@ int makeProgram(GLuint* program, const char* vertPath, const char* fragPath, Sha
  * @param out  Variable that will contain the texture index on successful loading.
  * @return True on success, false on failure.
  */
-bool setupTexture(char* file, GLuint* out);
+bool setupTexture(char const* file, GLuint* out);
 
 /**
  * @brief Sets up the vertex specification for the currently bound buffer.

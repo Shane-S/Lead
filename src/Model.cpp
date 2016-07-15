@@ -1,8 +1,17 @@
+#include "GLProgramUtils.h"
 #include "Model.h"
+#include "Scene.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-Model::Model(char const* texture, std::vector<VertexAttribute> vertexSpec, float const* vertices, size_t numVertices)
-	: vertexSpec_(std::move(vertexSpec)), numVerts_(numVertices), vertexSize_(0)
+Model::Model(char const* texture, const std::vector<VertexAttribute>& vertexSpec, float const* vertices, size_t numVertices)
+    : vertexSpec_(vertexSpec), numVerts_(numVertices), vertexSize_(0), pos({ 0, 0, 0 }), scale({ 1, 1, 1 }), texturePath_(texture)
 {
+    if (!setupTexture(texturePath_, &texture_)) {
+        throw "Couldn't set up texture.";
+    }
+
 	// Calculate the size of a vertex (not going to handle every single case since I'm not using most of them
 	for (auto& attr : vertexSpec_) {
 		switch (attr.type) {
@@ -22,25 +31,46 @@ Model::Model(char const* texture, std::vector<VertexAttribute> vertexSpec, float
 		}
 	}
 
-	vertices_ = new float[numVerts_];
-	std::copy(vertices, vertices + numVerts_, vertices_);
+    size_t numFloats = numVerts_ * vertexSize_ / sizeof(float);
+	vertices_ = new float[numFloats];
+	std::copy(vertices, vertices + numFloats, vertices_);
+
+    // Generate and bind the vertex array object so that we only have to make this the active one later to draw
+    glGenVertexArrays(1, &vao_);
+    glBindVertexArray(vao_);
+
+    // Fill a buffer with the vertices for this object
+    glGenBuffers(1, &vbo_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+    glBufferData(GL_ARRAY_BUFFER, vertexSize_ * numVerts_, vertices_, GL_STATIC_DRAW);
+
+    // Set up the vertex specification
+    setVertexAttributes(&vertexSpec_[0], vertexSpec_.size());
+
+    glBindVertexArray(0);
 }
 
 Model::Model(const Model & other)
-	: vertexSpec_(other.vertexSpec_), numVerts_(other.numVerts_), vertices_(new float[other.numVerts_]), vertexSize_(other.vertexSize_)
+	: Model(other.texturePath_, other.vertexSpec_, other.vertices_, other.numVerts_)
 {
-	std::copy(other.vertices_, other.vertices_ + numVerts_, vertices_);
 }
 
 Model::Model(Model && other)
-	: vertexSpec_(std::move(other.vertexSpec_)), vertices_(other.vertices_), numVerts_(other.numVerts_)
+	: vertexSpec_(std::move(other.vertexSpec_)), vertices_(other.vertices_), numVerts_(other.numVerts_), vao_(other.vao_), vbo_(other.vbo_), texture_(other.texture_),
+      pos(other.pos), scale(other.scale)
 {
 	other.vertices_ = nullptr;
+    other.vao_ = 0;
+    other.vbo_ = 0;
+    other.texture_ = 0;
 }
 
 Model::~Model()
 {
 	delete[] vertices_;
+    glDeleteTextures(1, &texture_);
+    glDeleteBuffers(1, &vbo_);
+    glDeleteVertexArrays(1, &vao_);
 }
 
 Model & Model::operator=(Model rhs)
@@ -48,4 +78,39 @@ Model & Model::operator=(Model rhs)
 	swap(*this, rhs);
 
 	return *this;
+}
+
+void Model::update(float deltaTime)
+{
+    // Turns out I don't really need this... whoops
+}
+
+void Model::draw(Scene const& scene)
+{
+    glm::mat4x4 scl(glm::scale(scale));
+    glm::mat4x4 trans(glm::translate(pos));
+    glm::mat4x4 m(trans * scl);
+    glm::mat4x4 proj(scene.getCamera().getProjectionMatrix());
+    glm::mat4x4 mvp(scene.getCamera().getViewProjectionMatrix() * m);
+    Shader const& modelShader = scene.getShaders().find("model")->second;
+
+    modelShader.makeCurrent();
+    glBindTexture(GL_TEXTURE_2D, texture_);
+    
+    glm::mat4x4 ident = glm::mat4(1.f, 0.f, 0.f, 0.f,
+                                  0.f, 1.f, 0.f, 0.f,
+                                  0.f, 0.f, 1.f, 0.f,
+                                  0.f, 0.f, 0.f, 1.f);
+
+    glBindVertexArray(vao_);
+    glUniformMatrix4fv(modelShader.getUniforms().find("mvp")->second, 1, GL_FALSE, glm::value_ptr(mvp));
+
+    glm::vec4 vert(vertices_[0], vertices_[1], vertices_[2], 1.f);
+    vert = mvp * vert;
+    vert.x = vert.x / vert.w;
+    vert.y = vert.y / vert.w;
+    vert.z = vert.z / vert.w;
+    vert.w = vert.w / vert.w;
+
+    glDrawArrays(GL_TRIANGLES, 0, numVerts_);
 }

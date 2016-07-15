@@ -42,10 +42,13 @@ int main(int argc, char **argv) {
 		return 4;
 	}
 
-	glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_TEXTURE_2D);
+    glCullFace(GL_BACK);
 	glClearColor(103.f / 255, 193.f / 255, 244.f / 255, 1.f);
 
-	Scene scene;
+	Scene scene(window);
 	Uint32 lastTicks = SDL_GetTicks();
 	Uint32 currentTicks;
 	
@@ -55,9 +58,9 @@ int main(int argc, char **argv) {
 		Uint32 delta = currentTicks - lastTicks;
 		if (delta < 16) continue;
 
-		double deltaSecs = delta = 1000.0;
-		if (!scene.Update(deltaSecs)) break; // OK, this is a bit ugly, but it works
-		scene.Draw();
+		float deltaSecs = delta / 1000.f;
+		if (!scene.update(deltaSecs)) break; // OK, this is a bit ugly, but it works
+		scene.draw();
 
 		SDL_GL_SwapWindow(window);
 

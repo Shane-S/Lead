@@ -6,6 +6,7 @@
 #include <string>
 #include "GLProgramUtils.h"
 #include <SDL2/SDL_image.h>
+#include <Windows.h>
 
 using std::cout;
 using std::cerr;
@@ -71,7 +72,8 @@ bool compileShader(GLuint *shader, GLenum type, const char* file)
         return false;  
     }
     
-    source = (GLchar*)buffer.str().c_str();
+    std::string srcStr(buffer.str());
+    source = (GLchar*)srcStr.c_str();
     
     // Create and attempt to compile the shader with the given source code
     *shader = glCreateShader(type);
@@ -110,7 +112,7 @@ int makeProgram(GLuint *program, const char* vertPath, const char* fragPath, Sha
         cerr << "Could not compile vertex shader " << vertPath << endl;
         return 1;
     }
-    if (compileShader(&fragShader, GL_FRAGMENT_SHADER, fragPath)) {
+    if (!compileShader(&fragShader, GL_FRAGMENT_SHADER, fragPath)) {
         cerr << "Could not compile fragment shader " << fragPath << endl;
         glDeleteShader(vertShader);
         return 2;
@@ -129,7 +131,7 @@ int makeProgram(GLuint *program, const char* vertPath, const char* fragPath, Sha
     }
     
     // Link program.
-    if (linkProgram(*program)) {
+    if (!linkProgram(*program)) {
         cerr << "Could not link program for vertex shader " << vertPath << " and fragment shader " << fragPath << endl;
 
         if (vertShader) {
@@ -162,43 +164,54 @@ int makeProgram(GLuint *program, const char* vertPath, const char* fragPath, Sha
 }
 
 /**
- * I'm probably not actually going to bother switching up the formats, mainly because that would be a giant
- * (and unnecessary in most cases) pain in the ass.
+ * Determines the image's format and an appropriate format to store the image in OpenGL.
+ * @param img       The SDL_Surface containing the texture.
+ * @param imgFormat Holds the OpenGL pixel format describing the image in client memory.
+ * @param intFormat Holds the OpenGL pixel format that will be used for storage on the GPU.
+ * @return True if there was an appropriate format for the image, false otherwise (requires conversion to some other format).
  */
-GLenum getGLFormat(SDL_Surface* img) {
+bool getGLFormat(SDL_Surface* img, GLenum* imgFormat, GLenum* intFormat) {
 	switch (img->format->format) {
-	case SDL_PIXELFORMAT_RGBA4444:
-		return GL_RGBA;
-	case SDL_PIXELFORMAT_RGB444:
-		return GL_RGB;
-	case SDL_PIXELFORMAT_BGRA4444:
-		return GL_BGRA;
+	case SDL_PIXELFORMAT_ABGR8888:
+		*imgFormat = GL_RGBA;
+        *intFormat = GL_RGBA8;
+        return true;
+	case SDL_PIXELFORMAT_BGR888:
+		*imgFormat = GL_RGB;
+        *intFormat = GL_RGB8;
+        return true;
 	default:
-		return -1;
+		return false;
 	}
 }
 
 // Load in and set up texture image (adapted from Ray Wenderlich)
-bool setupTexture(char* file, GLuint* out)
+bool setupTexture(char const* file, GLuint* out)
 {
 	SDL_Surface* img = IMG_Load(file);
+    
 	if (!img) {
 		cerr << "Error while loading texture " << file << ": " << IMG_GetError();
 		return false;
 	}
 
 	GLuint tex;
-	GLenum format = getGLFormat(img);
-	if (format == -1) {
-		cerr << "Texture is not in a supported image format (so now you have to implement the conversion, lol)" << endl;
-		SDL_FreeSurface(img);
-		return false;
+    GLenum imgFormat, intFormat;
+	if (!getGLFormat(img, &imgFormat, &intFormat)) {
+        std::cout << "Changing from pixel format " << SDL_GetPixelFormatName(img->format->format) << " to SDL_PIXELFORMAT_ABGR8888" << std::endl;
+        
+        // SDL_PIXELFORMAT_ABGR because SDL manipulates things as Uint32; on little-endian machines, this stores each pixel backwards
+        SDL_Surface* old = img;
+        img = SDL_ConvertSurfaceFormat(old, SDL_PIXELFORMAT_ABGR8888, 0);
+        imgFormat = GL_RGBA;
+        intFormat = GL_RGBA8;
+        SDL_FreeSurface(old);
 	}
 
 	glGenTextures(1, &tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // This probably isn't really necessary
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->w, img->h, 0, format, GL_UNSIGNED_BYTE, img->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, intFormat, img->w, img->h, 0, imgFormat, GL_UNSIGNED_BYTE, img->pixels);
 
 	SDL_FreeSurface(img);
 	*out = tex;
