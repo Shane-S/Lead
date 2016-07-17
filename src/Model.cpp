@@ -87,30 +87,14 @@ void Model::update(float deltaTime)
 
 void Model::draw(Scene const& scene)
 {
-    glm::mat4x4 scl(glm::scale(scale));
-    glm::mat4x4 trans(glm::translate(pos));
-    glm::mat4x4 m(trans * scl);
-    glm::mat4x4 proj(scene.getCamera().getProjectionMatrix());
-    glm::mat4x4 mvp(scene.getCamera().getViewProjectionMatrix() * m);
+    glm::mat4x4 mvp(scene.getCamera().getViewProjectionMatrix() * glm::translate(pos) * glm::scale(scale));
     Shader const& modelShader = scene.getShaders().find("model")->second;
 
     modelShader.makeCurrent();
     glBindTexture(GL_TEXTURE_2D, texture_);
     
-    glm::mat4x4 ident = glm::mat4(1.f, 0.f, 0.f, 0.f,
-                                  0.f, 1.f, 0.f, 0.f,
-                                  0.f, 0.f, 1.f, 0.f,
-                                  0.f, 0.f, 0.f, 1.f);
-
     glBindVertexArray(vao_);
     glUniformMatrix4fv(modelShader.getUniforms().find("mvp")->second, 1, GL_FALSE, glm::value_ptr(mvp));
-
-    glm::vec4 vert(vertices_[0], vertices_[1], vertices_[2], 1.f);
-    vert = mvp * vert;
-    vert.x = vert.x / vert.w;
-    vert.y = vert.y / vert.w;
-    vert.z = vert.z / vert.w;
-    vert.w = vert.w / vert.w;
 
     glDrawArrays(GL_TRIANGLES, 0, numVerts_);
 }

@@ -9,7 +9,7 @@
 
 Scene::Scene(SDL_Window* window)
     : models_(), shaders_(), window_(window),
-    cam_({ SDL_GetWindowSurface(window)->w, SDL_GetWindowSurface(window)->h }, 45.f, 0.5f, 400.f, 5.f, glm::pi<float>() / 2),
+    cam_({ SDL_GetWindowSurface(window)->w, SDL_GetWindowSurface(window)->h }, 45.f, 0.5f, 400.f, 8.f, 0.005f),
     camFocused_(false)
 {
     
@@ -31,15 +31,14 @@ Scene::Scene(SDL_Window* window)
                                std::vector<std::string>(&modelShaderUniforms[0], &modelShaderUniforms[0] + 1),
                                "assets/shader.vert", "assets/shader.frag"));
 
-
-    std::vector<VertexAttribute> attrs(planeVertSpec, planeVertSpec + numPlaneAttrs);
-    models_.push_back(Model(planeTexture, attrs, planeVerts, numPlaneVerts));
-    models_[0].pos = glm::vec3(0.f, 0.f, -3.f);
-    models_[0].scale = glm::vec3(1.f, 1.f, 1.f);
-
-    /*std::vector<VertexAttribute> attrs(cubeVertSpec, cubeVertSpec + numCubeAttrs);
+    std::vector<VertexAttribute> attrs(cubeVertSpec, cubeVertSpec + numCubeAttrs);
     models_.push_back(Model{ cubeTexture, attrs, cubeVerts, numCubeVerts });
-    models_[0].pos = glm::vec3(0.f, 0.f, -10.f);*/
+    models_[0].pos = glm::vec3(0.f, 0.f, -3.f);
+    models_[0].scale = glm::vec3(5.f, 5.f, 5.f);
+
+    //models_.push_back(Model{ shipTexture, attrs, shipVerts, numShipVerts });
+    //models_[1].pos = glm::vec3(0.f, 0.f, -3.f);
+    //models_[1].scale = glm::vec3(0.15f, 0.15f, 0.15f);
 }
 
 Scene::~Scene() {
