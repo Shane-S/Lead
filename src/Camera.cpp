@@ -36,15 +36,11 @@ void Camera::update(float deltaTime)
     orientation_.y -= mouseDeltaY * angular_;
 
     // Update rotation and look direction
-    glm::mat4 rotMat(glm::mat4(1.f));
-    rotMat = glm::rotate(rotMat, -orientation_.y, glm::vec3(1, 0, 0));
-    rotMat = glm::rotate(rotMat, -orientation_.x, glm::vec3(0, 1, 0));
+    glm::mat4 rotMat(glm::eulerAngleYXZ(-orientation_.x, -orientation_.y, 0.f));
 
-    glm::mat4 dirRotMat(glm::mat4(1.f));
-    dirRotMat = glm::rotate(dirRotMat, orientation_.x, glm::vec3(0, 1, 0));
-    dirRotMat = glm::rotate(dirRotMat, orientation_.y, glm::vec3(1, 0, 0));
-    glm::vec3 lookDir(dirRotMat * glm::vec4( 0, 0, -1.f, 0 ));
-    glm::vec3 sideDir(dirRotMat * glm::vec4( 1.f, 0, 0, 0 ));
+    glm::mat4 dirRot(glm::eulerAngleYXZ(orientation_.x, orientation_.y, 0.f));
+    glm::vec3 lookDir(dirRot * glm::vec4(0, 0, -1, 1));
+    glm::vec3 sideDir(dirRot * glm::vec4(1, 0, 0, 1));
 
     // Update position
     const Uint8* kbd = SDL_GetKeyboardState(nullptr);
@@ -67,6 +63,6 @@ void Camera::update(float deltaTime)
     glm::vec3 sideTrans(sideDir * x);
     pos_ += lookTrans + sideTrans;
 
-    viewMatrix_ = glm::translate(rotMat, -pos_);
+    viewMatrix_ = glm::lookAt(pos_, pos_ + lookDir, glm::vec3(0, 1, 0));
     viewProjMatrix_ = projMatrix_ * viewMatrix_;
 }

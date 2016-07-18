@@ -31,14 +31,10 @@ Scene::Scene(SDL_Window* window)
                                std::vector<std::string>(&modelShaderUniforms[0], &modelShaderUniforms[0] + 1),
                                "assets/shader.vert", "assets/shader.frag"));
 
-    std::vector<VertexAttribute> attrs(cubeVertSpec, cubeVertSpec + numCubeAttrs);
-    models_.push_back(Model{ cubeTexture, attrs, cubeVerts, numCubeVerts });
+    std::vector<VertexAttribute> attrs(shipVertSpec, shipVertSpec + numShipAttrs);
+    models_.push_back(Model{ shipTexture, attrs, shipVerts, numShipVerts });
     models_[0].pos = glm::vec3(0.f, 0.f, -3.f);
-    models_[0].scale = glm::vec3(5.f, 5.f, 5.f);
-
-    //models_.push_back(Model{ shipTexture, attrs, shipVerts, numShipVerts });
-    //models_[1].pos = glm::vec3(0.f, 0.f, -3.f);
-    //models_[1].scale = glm::vec3(0.15f, 0.15f, 0.15f);
+    models_[0].scale = glm::vec3(0.07f, 0.07f, 0.07f);
 }
 
 Scene::~Scene() {
