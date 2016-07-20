@@ -1,16 +1,17 @@
 #include "Camera.h"
 #include <SDL2/SDL.h>
+#include <iostream>
+#define GLM_FORCE_RADIANS
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera(glm::vec2 windowDims, float fov, float nearPlane, float farPlane, float vel, float angularVel, glm::vec3 pos, float xRot, float yRot)
-    : projMatrix_(glm::perspective(fov, windowDims.x / windowDims.y, nearPlane, farPlane)), 
-      vel_(vel), angular_(angularVel), pos_(pos), orientation_(xRot, yRot, 0.f)
+Camera::Camera(glm::vec2 windowDims, float fov, float nearPlane, float farPlane, float vel, float angularVel,
+               glm::vec3 pos, float xRot, float yRot)
+    : projMatrix_(glm::perspective(glm::radians(fov), windowDims.x / windowDims.y, nearPlane, farPlane)), 
+      vel_(vel), angular_(angularVel), pos_(pos), orientation_(glm::radians(xRot), glm::radians(yRot), 0.f)
 {
-    glm::mat4 viewRotX = glm::rotate(glm::mat4(1.f), -orientation_.x, glm::vec3(0, 1, 0));
-    glm::mat4 viewRot = glm::rotate(viewRotX, -orientation_.y, glm::vec3(1, 0, 0));
-    viewMatrix_ = glm::translate(viewRot, -pos);
+    viewMatrix_ = glm::translate(glm::yawPitchRoll(-orientation_.x, -orientation_.y, 0.f), -pos);
     viewProjMatrix_ = projMatrix_ * viewMatrix_;
 }
 
@@ -34,11 +35,13 @@ void Camera::update(float deltaTime)
     
     orientation_.x -= mouseDeltaX * angular_;
     orientation_.y -= mouseDeltaY * angular_;
+    
+    orientation_.y = glm::clamp(orientation_.y, glm::radians(-89.9f), glm::radians(89.9f));
 
     // Update rotation and look direction
-    glm::mat4 rotMat(glm::eulerAngleYXZ(-orientation_.x, -orientation_.y, 0.f));
+    glm::mat4 rotMat(glm::yawPitchRoll(-orientation_.x, -orientation_.y, 0.f));
 
-    glm::mat4 dirRot(glm::eulerAngleYXZ(orientation_.x, orientation_.y, 0.f));
+    glm::mat4 dirRot(glm::yawPitchRoll(orientation_.x, orientation_.y, 0.f));
     glm::vec3 lookDir(dirRot * glm::vec4(0, 0, -1, 1));
     glm::vec3 sideDir(dirRot * glm::vec4(1, 0, 0, 1));
 

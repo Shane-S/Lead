@@ -1,6 +1,7 @@
 #include "GLProgramUtils.h"
 #include "Model.h"
 #include "Scene.h"
+#define GLM_FORCE_RADIANS
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
