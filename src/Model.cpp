@@ -88,7 +88,7 @@ void Model::update(float deltaTime)
 
 void Model::draw(Scene const& scene)
 {
-    glm::mat4x4 mvp(scene.getCamera().getViewProjectionMatrix() * glm::translate(pos) * glm::scale(scale));
+    glm::mat4 mvp(scene.getCamera().getViewProjectionMatrix() * glm::translate(pos) * glm::scale(scale));
     Shader const& modelShader = scene.getShaders().find("model")->second;
 
     modelShader.makeCurrent();

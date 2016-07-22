@@ -9,7 +9,7 @@
 
 Scene::Scene(SDL_Window* window)
     : models_(), shaders_(), window_(window),
-    cam_({ SDL_GetWindowSurface(window)->w, SDL_GetWindowSurface(window)->h }, 45.f, 0.5f, 400.f, 8.f, 0.005f),
+    cam_({ SDL_GetWindowSurface(window)->w, SDL_GetWindowSurface(window)->h }, 45.f, 0.5f, 400.f, 8.f, 0.005f, "assets/reticle.png"),
     camFocused_(false)
 {
     
@@ -17,19 +17,26 @@ Scene::Scene(SDL_Window* window)
 	tweakBar_ = TwNewBar("libpb Params");
 	TwAddVarRW(tweakBar_, "Width", TW_TYPE_INT32, &test, " label='Wnd width' help='Width of the graphics window (in pixels)' ");
 
-    ShaderAttribute modelShaderAttrs[] = {
+    // Create the shader used for models
+    std::vector<ShaderAttribute> modelShaderAttrs = {
         {VertexAttribPos, "position"},
         {VertexAttribNormal, "normal"},
         {VertexAttribTexCoord0, "texCoordIn"}
     };
-
-    char* modelShaderUniforms[] = {
+    std::vector<std::string> modelShaderUniforms = {
         "mvp"
     };
+    shaders_.emplace("model", Shader(modelShaderAttrs, modelShaderUniforms, "assets/shader.vert", "assets/shader.frag"));
 
-    shaders_.emplace("model", Shader(std::vector<ShaderAttribute>(&modelShaderAttrs[0], &modelShaderAttrs[0] + 3),
-                               std::vector<std::string>(&modelShaderUniforms[0], &modelShaderUniforms[0] + 1),
-                               "assets/shader.vert", "assets/shader.frag"));
+    // Create the shader used for 2D projections (the floor plan)
+    std::vector<ShaderAttribute> orthoShaderAttrs = {
+        {VertexAttribPos, "position"},
+        {VertexAttribTexCoord0, "texCoordIn"}
+    };
+    std::vector<std::string> orthoShaderUniforms = {
+        "mvp"
+    };
+    shaders_.emplace("ortho", Shader(orthoShaderAttrs, orthoShaderUniforms, "assets/ortho_shader.vert", "assets/ortho_shader.frag"));
 
     std::vector<VertexAttribute> attrs(shipVertSpec, shipVertSpec + numShipAttrs);
     models_.push_back(Model{ shipTexture, attrs, shipVerts, numShipVerts });
@@ -120,11 +127,16 @@ bool Scene::update(float deltaTime) {
 
 void Scene::draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	TwDraw();
 
     for (auto& model : models_) {
         model.draw(*this);
     }
+
+    if (camFocused_) {
+        cam_.draw(*this);
+    }
+
+    TwDraw();
 }
 
 Camera const & Scene::getCamera() const
