@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
     glEnable(GL_CULL_FACE);
     glEnable(GL_TEXTURE_2D);
     glCullFace(GL_BACK);
-	glClearColor(103.f / 255, 193.f / 255, 244.f / 255, 1.f);
+	glClearColor(50.f / 255, 50.f / 255, 50.f / 255, 1.f);
 
 	Scene scene(window);
 	Uint32 lastTicks = SDL_GetTicks();

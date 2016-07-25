@@ -38,10 +38,10 @@ Scene::Scene(SDL_Window* window)
     };
     shaders_.emplace("ortho", Shader(orthoShaderAttrs, orthoShaderUniforms, "assets/ortho_shader.vert", "assets/ortho_shader.frag"));
 
-    std::vector<VertexAttribute> attrs(shipVertSpec, shipVertSpec + numShipAttrs);
-    models_.push_back(Model{ shipTexture, attrs, shipVerts, numShipVerts });
+    std::vector<VertexAttribute> attrs(cubeVertSpec, cubeVertSpec + numCubeAttrs);
+    models_.push_back(Model{ cubeTexture, attrs, cubeVerts, numCubeVerts });
     models_[0].pos = glm::vec3(0.f, 0.f, -3.f);
-    models_[0].scale = glm::vec3(0.07f, 0.07f, 0.07f);
+    models_[0].scale = glm::vec3(1.f, 1.f, 1.f);
 }
 
 Scene::~Scene() {
