@@ -3,6 +3,8 @@
 class Scene;
 
 class Drawable {
-    virtual void draw(Scene& scene) = 0;
+public:
+    virtual void update(float dt) = 0;
+    virtual void draw(Scene const& scene) = 0;
 };
 

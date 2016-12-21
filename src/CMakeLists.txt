@@ -7,7 +7,7 @@ set(HEADERS ${INCLUDE_DIR}/Camera.h
             ${INCLUDE_DIR}/GLProgramUtils.h
             ${INCLUDE_DIR}/Scene.h
 			${INCLUDE_DIR}/Shader.h
-            ${INCLUDE_DIR}/Model.h
+            ${INCLUDE_DIR}/Drawable3D.h
             ${INCLUDE_DIR}/TestModelVerts.h
 			${INCLUDE_DIR}/Utils.h ../include/Drawable.h)
 
@@ -15,10 +15,10 @@ set(SOURCES Camera.cpp
             GLProgramUtils.cpp
             Scene.cpp
 			Shader.cpp
-            Model.cpp
+        	Drawable3D.cpp
             TestModelVerts.cpp
 			Utils.cpp
-            main.cpp ../include/Drawable.h)
+            main.cpp ../include/Drawable.h ../include/Drawable3DContainer.cpp ../include/Drawable3DContainer.h)
 
 find_package(AntTweakBar REQUIRED)
 include_directories(${AntTweakBar_INCLUDE_DIRS})

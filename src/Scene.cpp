@@ -7,7 +7,7 @@
 #define CAMERA_TOGGLE SDLK_c
 
 Scene::Scene(SDL_Window* window)
-    : models_(), shaders_(), window_(window),
+    : drawList_(), shaders_(), window_(window),
     cam_({ SDL_GetWindowSurface(window)->w, SDL_GetWindowSurface(window)->h }, 45.f, 0.5f, 400.f, 8.f, 0.005f, "assets/reticle.png"),
     camFocused_(false)
 {
@@ -15,6 +15,8 @@ Scene::Scene(SDL_Window* window)
 	test = 50;
 	tweakBar_ = TwNewBar("libpb Params");
 	TwAddVarRW(tweakBar_, "Width", TW_TYPE_INT32, &test, " label='Wnd width' help='Width of the graphics window (in pixels)' ");
+
+
 
     // Create the shader used for models
     std::vector<ShaderAttribute> modelShaderAttrs = {
@@ -38,9 +40,10 @@ Scene::Scene(SDL_Window* window)
     shaders_.emplace("ortho", Shader(orthoShaderAttrs, orthoShaderUniforms, "assets/ortho_shader.vert", "assets/ortho_shader.frag"));
 
     std::vector<VertexAttribute> attrs(cubeVertSpec, cubeVertSpec + numCubeAttrs);
-    models_.push_back(Model{ cubeTexture, attrs, cubeVerts, numCubeVerts });
-    models_[0].pos = glm::vec3(0.f, 0.f, -3.f);
-    models_[0].scale = glm::vec3(1.f, 1.f, 1.f);
+    drawList_.push_back(std::shared_ptr<Drawable>(new Drawable3D{ cubeTexture, attrs, cubeVerts, numCubeVerts, true }));
+    auto ptr = std::static_pointer_cast<Drawable3D>(drawList_[0]);
+    ptr->pos = glm::vec3(0.f, 0.f, -3.f);
+    ptr->scale = glm::vec3(1.f, 1.f, 1.f);
 }
 
 Scene::~Scene() {
@@ -127,8 +130,8 @@ bool Scene::update(float deltaTime) {
 void Scene::draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (auto& model : models_) {
-        model.draw(*this);
+    for (auto& drawable : drawList_) {
+        drawable->draw(*this);
     }
 
     if (camFocused_) {

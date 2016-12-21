@@ -2,12 +2,14 @@
 #include <vector>
 #include <utility>
 #include <glm/glm.hpp>
+#include <memory>
 #include "GLProgramUtils.h"
 #include "Camera.h"
+#include "Drawable3DContainer.h"
 
 class Scene;
 
-class Model {
+class Drawable3D : public Drawable3DContainer {
 public:
 
 	/**
@@ -16,25 +18,18 @@ public:
 	 * @param vertexSpec  A list of vertex attributes describing the memory layout of each vertex.
 	 * @param vertices    The list of vertices making up this model (which will be copied).
 	 * @param numVertices The number of vertices in the list.
-	 * @param copyVerts   Whether to copy the vertices from the given list (false by default; set to true if vertices wasn't 
+	 * @param copyVerts   Whether to copy the vertices from the given list. If false, the Drawable3D instance assumes
+	 *                    that this pointer is malloc'd and will assume its ownership.
 	 */
-	Model(char const* texture, const std::vector<VertexAttribute>& vertexSpec, float const* vertices, size_t numVertices);
+    Drawable3D(char const* texture, const std::vector<VertexAttribute>& vertexSpec, void * vertices,
+                           size_t numVertices, bool copyVerts);
 
-	Model(const Model& other);
-	Model(Model&& other);
+	Drawable3D(const Drawable3D& other) = delete;
+	Drawable3D(Drawable3D&& other) = delete;
 
-	~Model();
+	~Drawable3D();
 
-	Model& operator=(Model rhs);
-
-	friend void swap(Model& left, Model& right) noexcept {
-		using std::swap;
-
-		swap(left.vertexSpec_, right.vertexSpec_);
-		swap(left.vertices_, right.vertices_);
-		swap(left.numVerts_, right.numVerts_);
-		swap(left.vertexSize_, right.vertexSize_);
-	}
+	Drawable3D& operator=(Drawable3D & rhs) = delete;
 
     /** 
      * Computes the model's new position and orientation based on velocity and angular velocity.
@@ -46,14 +41,10 @@ public:
      */
     void draw(Scene const& scene);
 
-    // Transform info (I won't be rotating anything in the demo, so no need for orientation info)
-    glm::vec3 pos;
-    glm::vec3 scale;
-
 private:
 	// Drawing info
 	std::vector<VertexAttribute> vertexSpec_;
-	float* vertices_;
+	void * vertices_;
 	size_t numVerts_;
 	size_t vertexSize_;
     

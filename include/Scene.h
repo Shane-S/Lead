@@ -2,9 +2,10 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <memory>
 #include <AntTweakBar.h>
 #include <SDL2/SDL.h>
-#include "Model.h"
+#include "Drawable3D.h"
 #include "Shader.h"
 
 /**
@@ -44,11 +45,12 @@ private:
     Camera cam_;
     bool camFocused_;
 
-	std::vector<Model> models_;
+	std::vector<std::shared_ptr<Drawable>> drawList_;
 	std::map<std::string, Shader> shaders_;
 	int test;
 
 	TwBar* tweakBar_;
     SDL_Window* window_;
-    
+
+
 };
