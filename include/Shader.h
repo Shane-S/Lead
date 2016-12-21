@@ -21,8 +21,8 @@ public:
 	~Shader();
 	
 	// We only want move semantics for this object to avoid having the program accidentally deleted
-	Shader(Shader& other) = delete;
-	Shader& operator=(Shader &rhs) = delete;
+	Shader(Shader const& other) = delete;
+	Shader& operator=(Shader const& rhs) = delete;
 
 	/**
 	 * Returms the map of uniform variable names to the OpenGL identifiers.

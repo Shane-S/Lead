@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
 	}
 
 	// Initialise GLEW
+    glewExperimental = GL_TRUE;
 	GLenum result = glewInit();
 	if (result != GLEW_OK) {
 		std::cerr << "Error while initialising GLEW: " << glewGetErrorString(result) << std::endl;

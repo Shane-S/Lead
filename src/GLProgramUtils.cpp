@@ -1,12 +1,17 @@
 //  Stolen/adapted from Viking XII: https://github.com/LamePancake/VikingXII
 
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "GLProgramUtils.h"
 #include <SDL2/SDL_image.h>
+
+#ifdef _WIN32
 #include <Windows.h>
+#endif
+
+#include "GLProgramUtils.h"
 
 using std::cout;
 using std::cerr;
@@ -80,15 +85,15 @@ bool compileShader(GLuint *shader, GLenum type, const char* file)
     glShaderSource(*shader, 1, &source, NULL);
     glCompileShader(*shader);
     
-#if defined(DEBUG)
+#ifndef NDEBUG
     // Output info about the shader compilation
     GLint logLength;
     glGetShaderiv(*shader, GL_INFO_LOG_LENGTH, &logLength);
     if (logLength > 0) {
-        GLchar *log = (GLchar *)malloc(logLength);
+        GLchar *log = (GLchar *)::malloc(logLength);
         glGetShaderInfoLog(*shader, logLength, &logLength, log);
         cout << "Shader compile log:\n" << log << endl;
-        free(log);
+        ::free(log);
     }
 #endif
     

@@ -1,9 +1,8 @@
-#pragma once
 #include <SDL2/SDL.h>
+#include <iostream>
 #include "Scene.h"
 #include "Utils.h"
 #include "TestModelVerts.h"
-#include <iostream>
 
 #define CAMERA_TOGGLE SDLK_c
 

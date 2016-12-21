@@ -113,15 +113,15 @@ void Camera::update(float deltaTime)
 
 void Camera::draw(Scene const& scene)
 {
-    const Shader& orthoShader = scene.getShaders().find("ortho")->second;
-    orthoShader.makeCurrent();
+    auto const& shaders = scene.getShaders();
+    shaders.find("ortho")->second.makeCurrent();
 
     glBindVertexArray(reticleVAO_);
     glBindTexture(GL_TEXTURE_2D, reticleTex_);
 
     glm::mat4 ident(1.f);
 
-    glUniformMatrix4fv(orthoShader.getUniforms().find("mvp")->second, 1, GL_FALSE, glm::value_ptr(reticleProj_));
+    glUniformMatrix4fv(shaders.find("ortho")->second.getUniforms().find("mvp")->second, 1, GL_FALSE, glm::value_ptr(reticleProj_));
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
