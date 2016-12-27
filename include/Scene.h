@@ -5,8 +5,12 @@
 #include <memory>
 #include <AntTweakBar.h>
 #include <SDL2/SDL.h>
+#include <pb/util/hashmap/hashmap.h>
+#include <pb/sq_house.h>
 #include "Drawable3D.h"
 #include "Shader.h"
+#include "FloorPlan.h"
+#include "Building.h"
 
 /**
  * A simple scene with a camera, models to draw, and a GUI.
@@ -32,6 +36,8 @@ public:
     Camera const& getCamera() const;
     std::map<std::string, Shader> const& getShaders() const;
 
+    void generateHouse();
+
 private:
     // Update function for AntTweakBar
     void twUpdate(SDL_Event& ev);
@@ -47,10 +53,16 @@ private:
 
 	std::vector<std::shared_ptr<Drawable>> drawList_;
 	std::map<std::string, Shader> shaders_;
-	int test;
+    std::map<std::string, GLuint> textures_; // Textures for libpb
 
 	TwBar* tweakBar_;
     SDL_Window* window_;
 
+    // libpb stuff
+    std::shared_ptr<FloorPlan> plan_;
+	std::shared_ptr<Building> building_;
 
+    unsigned int seed_;
+	pb_hashmap* roomSpecs_;
+    pb_sq_house_house_spec houseSpec_;
 };

@@ -76,7 +76,7 @@ VertexAttribute cubeSpec[] = {
 	{ VertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 32, 24 },
 };
 size_t numCubeAttrs = sizeof(cubeSpec) / sizeof(VertexAttribute);
-char const* cubeTexture = "assets/cube.png";
+char const* cubeTexture = "assets/cube.jpg";
 size_t cubeVertSize = sizeof(float) * 8;
 size_t numCubeVerts = 36;
 VertexAttribute* cubeVertSpec = &cubeSpec[0];

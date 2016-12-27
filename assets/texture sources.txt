@@ -1,0 +1,38 @@
+Texture sources:
+*   Bathroom floor texture:
+    -   Page: http://seamless-pixels.blogspot.ca/p/free-seamless-marble-textures.html
+    -   Image: http://4.bp.blogspot.com/-zUW5GTOYchg/UmpPfglhhFI/AAAAAAAAE1U/xKgQT8TzsMI/s1600/Tileable+marble+floor+tile+texture+(43).jpg
+*   Laundry room floor texture:
+    -   Page: http://amazingtile.info/tile-floor/marble-tile-flooring-texture.html
+    -   Image: http://amazingtile.info/wp-content/uploads/2016/02/marble-tile-flooring-texture.jpg
+*   Bedroom floor texture:
+    -   Page: http://seamless-pixels.blogspot.ca/2012/09/seamless-coloured-carpet-floor-texture.html
+    -   Image: http://3.bp.blogspot.com/-yrh_atograU/UFhj_v6uBvI/AAAAAAAACKU/tWXypPzRhYo/s1600/Seamless+coloured+carpet+floor+texture.jpg
+*   Master bedroom floor texture:
+    -   Page: https://www.freecreatives.com/textures/seamless-carpet-texture.html
+    -   Image: https://images.freecreatives.com/wp-content/uploads/2016/02/Amazing-Seamless-Carpet-Texture.jpg
+*   Living room floor texture
+    -   Page: https://www.freecreatives.com/textures/seamless-carpet-texture.html
+    -   Image: https://www.freecreatives.com/wp-content/uploads/2016/02/Seamless-Carpet-Dark-Texture.jpg
+*   Kitchen floor texture:
+    -   Page: http://seamless-pixels.blogspot.ca/p/free-seamless-marble-textures.html
+    -   Image: http://2.bp.blogspot.com/-DI7aOV_N8e0/UmpPkDl3iqI/AAAAAAAAE2o/2ayKchDmrh0/s1600/Tileable+marble+floor+tile+texture+(6).jpg
+*   Pantry floor texture:
+    -   Page: http://www.archiexpo.com/prod/armstrong-dlw/product-30-931138.html
+    -   Image: http://img.archiexpo.com/images_ae/photo-g/30-8936226.jpg
+*   Dining room floor texture:
+    -   Page: https://www.pinterest.com/pin/54817320443512751/
+    -   Image: https://s-media-cache-ak0.pinimg.com/736x/ab/73/9d/ab739d5653829af07f26b9c96efcf191.jpg
+*   Hardwood tile floor texture (hallways, stair rooms):
+    -   Page: http://www.saharchicago.com/basket-weave-tile.html (doesn't exist, apparently)
+    -   Image: http://www.handydeck.com/images/products/teak_classic_installed.jpg
+
+*   Stucco wall texture:
+    -   Page: http://seamless-pixels.blogspot.ca/2012/09/free-seamless-stucco-wall-plaster.html
+    -   Image: http://3.bp.blogspot.com/-0vANIEWArOY/UBY4A_VUEuI/AAAAAAAAB7s/HaKU-GWid5k/s1600/Blue+paint+wall+stucco+plaster+texture+tileable.jpg
+*   Ceiling texture:
+    -   Page: http://seamless-pixels.blogspot.ca/2012/09/free-seamless-stucco-wall-plaster.html
+    -   Image: http://2.bp.blogspot.com/-XiMJdNvDolA/UA-LBWep8aI/AAAAAAAAB44/Luj20x14MtI/s1600/Seamless+wall+white+paint+stucco+plaster+texture+01.jpg
+*   Wood siding texture:
+    -   Page: http://www.dfiles.me/seamless-wood-siding-texture.html
+    -   Image: https://www.sketchuptextureclub.com/public/texture_d/0030-cypress-siding-wood-texture-seamless-hr.jpg

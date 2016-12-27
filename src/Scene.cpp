@@ -1,22 +1,167 @@
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <pb/util/hashmap/hash_utils.h>
+#include <pb/sq_house.h>
 #include "Scene.h"
 #include "Utils.h"
 #include "TestModelVerts.h"
+#include "FloorPlan.h"
 
 #define CAMERA_TOGGLE SDLK_c
+
+void generateHouseCallback(void* scene)
+{
+    Scene* scn = reinterpret_cast<Scene*>(scene);
+    scn->generateHouse();
+}
+
+static char const* living_adj[] = {
+        PB_SQ_HOUSE_OUTSIDE,
+        PB_SQ_HOUSE_STAIRS,
+        "Laundry room",
+        "Kitchen",
+        "Dining room",
+        "Bathroom",
+        "Bedroom",
+        "Master bedroom",
+};
+
+static char const* kitchen_adj[] = {
+        PB_SQ_HOUSE_OUTSIDE,
+        "Pantry",
+        "Laundry room",
+        "Living room",
+        "Dining room"
+};
+
+static char const* pantry_adj[] = {
+        "Laundry room",
+        "Kitchen"
+};
+
+static char const* laundry_adj[] = {
+        PB_SQ_HOUSE_STAIRS,
+        "Kitchen",
+        "Pantry",
+};
+
+static char const* dining_adj[] = {
+        "Kitchen",
+        "Living room",
+        "Bathroom",
+        "Bedroom",
+        "Master bedroom",
+};
+
+static char const* bathroom_adj[] = {
+        PB_SQ_HOUSE_STAIRS,
+        "Living room",
+        "Dining room",
+        "Bedroom",
+        "Master bedroom",
+};
+
+static char const* bedroom_adj[] = {
+        PB_SQ_HOUSE_STAIRS,
+        "Living room",
+        "Dining room",
+        "Bathroom",
+};
+
+static char const* master_adj[] = {
+        PB_SQ_HOUSE_STAIRS,
+        "Living room",
+        "Dining room",
+        "Bathroom",
+};
+
+static pb_sq_house_room_spec specs[8];
 
 Scene::Scene(SDL_Window* window)
     : drawList_(), shaders_(), window_(window),
     cam_({ SDL_GetWindowSurface(window)->w, SDL_GetWindowSurface(window)->h }, 45.f, 0.5f, 400.f, 8.f, 0.005f, "assets/reticle.png"),
-    camFocused_(false)
+    textures_(),
+    camFocused_(false), plan_(nullptr), building_(nullptr), seed_(0xDEADBEEF)
 {
-    
-	test = 50;
+    // --------------------------Initialise Room Specifications----------------------------//
+    specs[0].name = "Living room";
+    specs[0].adjacent = &living_adj[0];
+    specs[0].num_adjacent = sizeof(living_adj) / sizeof(char*);
+    specs[0].priority = 0;
+    specs[0].max_instances = 1;
+    specs[0].area = 20.f;
+
+    specs[1].name = "Kitchen";
+    specs[1].adjacent = &kitchen_adj[0];
+    specs[1].num_adjacent = sizeof(kitchen_adj) / sizeof(char*);
+    specs[1].priority = 1;
+    specs[1].max_instances = 1;
+    specs[1].area = 15.f;
+
+    specs[2].name = "Pantry";
+    specs[2].adjacent = &pantry_adj[0];
+    specs[2].num_adjacent = sizeof(pantry_adj) / sizeof(char*);
+    specs[2].priority = 6;
+    specs[2].max_instances = 1;
+    specs[2].area = 5.f;
+
+    specs[3].name = "Laundry room";
+    specs[3].adjacent = &laundry_adj[0];
+    specs[3].num_adjacent = sizeof(laundry_adj) / sizeof(char*);
+    specs[3].priority = 4;
+    specs[3].max_instances = 1;
+    specs[3].area = 9.f;
+
+    specs[4].name = "Dining room";
+    specs[4].adjacent = &dining_adj[0];
+    specs[4].num_adjacent = sizeof(dining_adj) / sizeof(char*);
+    specs[4].priority = 5;
+    specs[4].max_instances = 1;
+    specs[4].area = 15.f;
+
+    specs[5].name = "Bathroom";
+    specs[5].adjacent = &bathroom_adj[0];
+    specs[5].num_adjacent = sizeof(bathroom_adj) / sizeof(char*);
+    specs[5].priority = 2;
+    specs[5].max_instances = 5;
+    specs[5].area = 7.f;
+
+    specs[6].name = "Bedroom";
+    specs[6].adjacent = &bedroom_adj[0];
+    specs[6].num_adjacent = sizeof(bedroom_adj) / sizeof(char*);
+    specs[6].priority = 3;
+    specs[6].max_instances = 5;
+    specs[6].area = 10.f;
+
+    specs[7].name = "Master bedroom";
+    specs[7].adjacent = &master_adj[0];
+    specs[7].num_adjacent = sizeof(master_adj) / sizeof(char*);
+    specs[7].priority = 7;
+    specs[7].max_instances = 1;
+    specs[7].area = 15.f;
+
+    size_t i;
+    roomSpecs_ = pb_hashmap_create(pb_str_hash, pb_str_eq);
+    for (i = 0; i < 8; ++i) {
+        pb_hashmap_put(roomSpecs_, specs[i].name, &specs[i]);
+    }
+
+    houseSpec_.num_rooms = 15;
+    houseSpec_.door_size = 0.75f;
+    houseSpec_.window_size = 0.5f;
+    houseSpec_.hallway_width = 0.75f;
+    houseSpec_.stair_room_width = 3.f;
+    houseSpec_.width = 15.f;
+    houseSpec_.height = 10.f;
+
+    //--------------------------Tweak Bar Init----------------------------//
 	tweakBar_ = TwNewBar("libpb Params");
-	TwAddVarRW(tweakBar_, "Width", TW_TYPE_INT32, &test, " label='Wnd width' help='Width of the graphics window (in pixels)' ");
+	TwAddVarRW(tweakBar_, "Random Seed", TW_TYPE_UINT32, &seed_, " label='Random Seed' help='Seed value for the rand() function.' ");
+    TwAddVarRW(tweakBar_, "Number of Rooms", TW_TYPE_UINT32, &houseSpec_.num_rooms,
+               " label='Number of Rooms' help='Seed value for the rand() function.' ");
+    TwAddButton(tweakBar_, "Generate", generateHouseCallback, this, " label='Generate House' help='Generates a new floor plan and house.' ");
 
-
+    //--------------------------Create test model----------------------------//
 
     // Create the shader used for models
     std::vector<ShaderAttribute> modelShaderAttrs = {
@@ -44,14 +189,42 @@ Scene::Scene(SDL_Window* window)
     auto ptr = std::static_pointer_cast<Drawable3D>(drawList_[0]);
     ptr->pos = glm::vec3(0.f, 0.f, -3.f);
     ptr->scale = glm::vec3(1.f, 1.f, 1.f);
+
+    //--------------------------Load textures----------------------------//
+    textures_.emplace("Bathroom floor", 0);
+    textures_.emplace("Laundry room floor", 0);
+    textures_.emplace("Bedroom floor", 0);
+    textures_.emplace("Master bedroom floor", 0);
+    textures_.emplace("Living room floor", 0);
+    textures_.emplace("Kitchen floor", 0);
+    textures_.emplace("Pantry floor", 0);
+    textures_.emplace("Dining room floor", 0);
+    textures_.emplace("Hardwood tile floor", 0);
+    textures_.emplace("Stucco wall", 0);
+    textures_.emplace("Stucco ceiling", 0);
+    textures_.emplace("Wood siding", 0);
+
+    for (auto& entry : textures_) {
+        std::string path = "assets/" + entry.first + ".jpg";
+
+        if (!setupTexture(path.c_str(), &entry.second)) {
+            throw "Couldn't load texture " + path;
+        }
+    }
 }
 
-Scene::~Scene() {
+Scene::~Scene()
+{
 	TwDeleteBar(tweakBar_);
+    for (auto& entry : textures_) {
+        glDeleteTextures(1, &entry.second);
+    }
 }
 
-void Scene::twUpdate(SDL_Event& ev) {
-    switch (ev.type) {
+void Scene::twUpdate(SDL_Event& ev)
+{
+    switch (ev.type)
+    {
     case SDL_KEYUP:
     {
         int translated = SDLToTwKey(ev.key.keysym.sym);
@@ -75,14 +248,16 @@ void Scene::twUpdate(SDL_Event& ev) {
     }
 }
 
-void Scene::focusCam() {
+void Scene::focusCam()
+{
     int fake;
     SDL_SetRelativeMouseMode((SDL_bool)1);
     SDL_GetRelativeMouseState(&fake, &fake); // Flush the relative mouse state so that we don't report something stupid
     SDL_ShowCursor(0);
 }
 
-void Scene::focusTw() {
+void Scene::focusTw()
+{
     SDL_Surface* wndSurface = SDL_GetWindowSurface(window_);
 
     SDL_SetRelativeMouseMode((SDL_bool)0);
@@ -90,38 +265,53 @@ void Scene::focusTw() {
     SDL_ShowCursor(1);
 }
 
-bool Scene::update(float deltaTime) {
+bool Scene::update(float deltaTime)
+{
     SDL_Event ev;
 
-    while (SDL_PollEvent(&ev)) {
-        switch (ev.type) {
+    while (SDL_PollEvent(&ev))
+    {
+        switch (ev.type)
+        {
         case SDL_KEYUP:
-            if (ev.key.keysym.sym == CAMERA_TOGGLE) {
+            if (ev.key.keysym.sym == CAMERA_TOGGLE)
+            {
                 camFocused_ = !camFocused_;
 
-                if (camFocused_) {
+                if (camFocused_)
+                {
                     focusCam();
                 }
-                else {
+                else
+                {
                     focusTw();
                     twUpdate(ev);
                 }
-            } else if (!camFocused_) {
+            }
+            else if (!camFocused_)
+            {
                 twUpdate(ev);
             }
             break;
         case SDL_QUIT:
             return false;
         default:
-            if (!camFocused_) {
+            if (!camFocused_)
+            {
                 twUpdate(ev);
             }
             break;
         }
     }
 
-    if (camFocused_) {
+    if (camFocused_)
+    {
         cam_.update(deltaTime);
+    }
+
+    for (auto& drawable : drawList_)
+    {
+        drawable->update(deltaTime);
     }
 
     return true;
@@ -130,11 +320,13 @@ bool Scene::update(float deltaTime) {
 void Scene::draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (auto& drawable : drawList_) {
+    for (auto& drawable : drawList_)
+    {
         drawable->draw(*this);
     }
 
-    if (camFocused_) {
+    if (camFocused_)
+    {
         cam_.draw(*this);
     }
 
@@ -149,4 +341,17 @@ Camera const & Scene::getCamera() const
 std::map<std::string, Shader> const & Scene::getShaders() const
 {
     return shaders_;
+}
+
+void Scene::generateHouse()
+{
+    if (plan_)
+    {
+        drawList_.pop_back();
+    }
+
+    plan_ = std::shared_ptr<FloorPlan>(new FloorPlan(roomSpecs_, &houseSpec_));
+    building_ = std::shared_ptr<Building>(new Building(*plan_, textures_));
+
+    drawList_.push_back(building_);
 }

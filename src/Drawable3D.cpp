@@ -10,12 +10,19 @@
 
 Drawable3D::Drawable3D(char const* texture, const std::vector<VertexAttribute>& vertexSpec, void * vertices,
                        size_t numVertices, bool copyVerts)
-    : Drawable3DContainer(), vertexSpec_(vertexSpec), numVerts_(numVertices), vertexSize_(0), texturePath_(texture)
+    : Drawable3D((GLuint)0, vertexSpec, vertices, numVertices, copyVerts)
 {
-    if (!setupTexture(texturePath_, &texture_)) {
+    if (!setupTexture(texture, &texture_)) {
         throw "Couldn't set up texture.";
     }
+    shouldDeleteTexture_ = true;
+}
 
+Drawable3D::Drawable3D(GLuint texture, const std::vector<VertexAttribute>& vertexSpec, void* vertices,
+        size_t numVertices, bool copyVerts)
+        : Drawable3DContainer(), vertexSpec_(vertexSpec), numVerts_(numVertices), vertexSize_(0),
+          texture_(texture), shouldDeleteTexture_(false)
+{
     // Calculate the size of a vertex (not going to handle every single case since I'm not using most of them
     for (auto& attr : vertexSpec_) {
         switch (attr.type) {
@@ -63,27 +70,35 @@ Drawable3D::Drawable3D(char const* texture, const std::vector<VertexAttribute>& 
 
 Drawable3D::~Drawable3D()
 {
-    std::free(vertices_);
-    glDeleteTextures(1, &texture_);
+    ::free(vertices_);
+    if (shouldDeleteTexture_)
+    {
+        glDeleteTextures(1, &texture_);
+    }
     glDeleteBuffers(1, &vbo_);
     glDeleteVertexArrays(1, &vao_);
 }
 
 void Drawable3D::update(float deltaTime)
 {
-    // Turns out I don't really need this... whoops
+    Drawable3DContainer::update(deltaTime);
 }
 
 void Drawable3D::draw(Scene const& scene)
 {
-    glm::mat4 mvp(scene.getCamera().getViewProjectionMatrix() * glm::translate(pos) * glm::scale(scale));
-    Shader const& modelShader = scene.getShaders().find("model")->second;
+    if (visible_)
+    {
+        glm::mat4 mvp(scene.getCamera().getViewProjectionMatrix() * getTransform());
+        Shader const& modelShader = scene.getShaders().find("model")->second;
 
-    modelShader.makeCurrent();
-    glBindTexture(GL_TEXTURE_2D, texture_);
-    
-    glBindVertexArray(vao_);
-    glUniformMatrix4fv(modelShader.getUniforms().find("mvp")->second, 1, GL_FALSE, glm::value_ptr(mvp));
+        modelShader.makeCurrent();
+        glBindTexture(GL_TEXTURE_2D, texture_);
 
-    glDrawArrays(GL_TRIANGLES, 0, numVerts_);
+        glBindVertexArray(vao_);
+        glUniformMatrix4fv(modelShader.getUniforms().find("mvp")->second, 1, GL_FALSE, glm::value_ptr(mvp));
+
+        glDrawArrays(GL_TRIANGLES, 0, (GLsizei)numVerts_);
+
+        Drawable3DContainer::draw(scene);
+    }
 }
