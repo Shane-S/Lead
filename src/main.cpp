@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     glCullFace(GL_BACK);
 	glClearColor(50.f / 255, 50.f / 255, 50.f / 255, 1.f);
 
-	Scene scene(window);
+	Scene* scene = new Scene(window);
 	Uint32 lastTicks = SDL_GetTicks();
 	Uint32 currentTicks;
 	
@@ -62,8 +62,8 @@ int main(int argc, char **argv) {
 		if (delta < 16) continue;
 
 		float deltaSecs = delta / 1000.f;
-		if (!scene.update(deltaSecs)) break; // OK, this is a bit ugly, but it works
-		scene.draw();
+		if (!scene->update(deltaSecs)) break; // OK, this is a bit ugly, but it works
+		scene->draw();
 
 		SDL_GL_SwapWindow(window);
 
@@ -73,9 +73,12 @@ int main(int argc, char **argv) {
 		lastTicks = currentTicks;
 	}
 
+    delete scene;
+
 	TwTerminate();
 	SDL_DestroyWindow(window);
 	SDL_GL_DeleteContext(context);
 	SDL_Quit();
+
     return 0;
 }

@@ -65,15 +65,15 @@ Building::Building(FloorPlan const& fp, std::map<std::string, GLuint>& textures)
 
             for (auto window_idx = 0; window_idx < r->num_windows; ++window_idx)
             {
-                pb_shape3D* window = r->doors + window_idx;
+                pb_shape3D* window = r->windows + window_idx;
                 auto windowDrawablePtr = new Drawable3D((GLuint)0, spec, window->tris, window->num_tris * 3, false);
                 windowDrawablePtr->setVisible(false);
                 windowDrawablePtr->pos.x = window->pos.x;
                 windowDrawablePtr->pos.y = window->pos.y;
                 windowDrawablePtr->pos.x = window->pos.z;
 
-                std::shared_ptr<Drawable3D> doorDrawable(windowDrawablePtr);
-                addChild(doorDrawable);
+                std::shared_ptr<Drawable3D> windowDrawable(windowDrawablePtr);
+                addChild(windowDrawable);
             }
             ::free(r->windows);
 
