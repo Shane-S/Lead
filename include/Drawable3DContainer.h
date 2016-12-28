@@ -23,15 +23,9 @@ public:
 
     glm::mat4 const& getTransform() const {return transform_;}
 
-    void setVisible(bool visible) {visible_ = visible;}
-    bool isVisible() {return visible_;}
-
     // Transform info (I won't be rotating anything in the demo, so no need for orientation info)
     glm::vec3 pos;
     glm::vec3 scale;
-
-protected:
-    bool visible_;
 
 private:
 

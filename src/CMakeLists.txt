@@ -32,26 +32,32 @@ include_directories(${SDL2IMAGE_INCLUDE_DIR})
 find_package(GLM REQUIRED)
 include_directories(${GLM_INCLUDE_DIRS})
 
+if (WIN32)
+    set(PROGRAMFILES_X86 "PROGRAMFILES(x86)")
+    
+    if (${CMAKE_SIZEOF_VOID_P} EQUAL 4)
+        if(NOT "$ENV{${PROGRAMFILES_X86}}" STREQUAL "")
+            set(PROGRAMFILES $ENV{${PROGRAMFILES_X86}})
+        else()
+           set(PROGRAMFILES $ENV{PROGRAMFILES})
+       endif()
+    else()
+       set(PROGRAMFILES $ENV{PROGRAMFILES})
+    endif()
+    
+    message(${PROGRAMFILES})
+    
+    list(APPEND CMAKE_PREFIX_PATH ${PROGRAMFILES}/GLEW)   
+    list(APPEND CMAKE_PREFIX_PATH ${PROGRAMFILES}/GLEW)
+endif(WIN32)
+
 find_package(GLEW REQUIRED)
 include_directories(${GLEW_INCLUDE_DIRS})
 
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIRS})
 
-# TODO: use the package registry with a post-install script or something
-find_path(pb_INCLUDE_DIR
-          NAMES extrusion.h sq_house.h floor_plan.h
-          PATHS /usr/local
-          PATH_SUFFIXES include/ include/pb)
-find_library(pb_LIBRARY
-             NAMES pb
-             PATHS /usr/local
-             PATH_SUFFIXES lib lib64)
-find_library(pb_util_LIBRARY
-             NAMES pb_util
-             PATHS /usr/local
-             PATH_SUFFIXES lib lib64)
-set(pb_LIBRARIES ${pb_LIBRARY} ${pb_util_LIBRARY})
+find_package(pb REQUIRED)
 
 add_executable(Lead ${SOURCES} ${HEADERS})
 target_link_libraries(Lead ${AntTweakBar_LIBRARIES}
@@ -59,6 +65,4 @@ target_link_libraries(Lead ${AntTweakBar_LIBRARIES}
                            ${OPENGL_LIBRARIES}
                            ${GLEW_LIBRARIES}
                            ${SDL2IMAGE_LIBRARY}
-                           ${pb_LIBRARIES})
-
-target_include_directories(Lead PRIVATE ${pb_INCLUDE_DIR})
+                           pb pb_util)

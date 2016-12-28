@@ -4,7 +4,6 @@
 #include <pb/util/geom/types.h>
 
 #include <cstring>
-#include <extrusion.h>
 
 #include "Building.h"
 #include "Drawable3D.h"

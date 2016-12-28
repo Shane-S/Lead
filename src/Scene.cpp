@@ -9,7 +9,7 @@
 
 #define CAMERA_TOGGLE SDLK_c
 
-void generateHouseCallback(void* scene)
+void TW_CALL generateHouseCallback(void* scene)
 {
     Scene* scn = reinterpret_cast<Scene*>(scene);
     scn->generateHouse();
@@ -354,4 +354,7 @@ void Scene::generateHouse()
     building_ = std::shared_ptr<Building>(new Building(*plan_, textures_));
 
     drawList_.push_back(building_);
+
+    // Stop showing the test asset
+    drawList_[0]->setVisible(false);
 }

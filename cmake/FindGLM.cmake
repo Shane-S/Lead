@@ -19,12 +19,17 @@
 include(FindPackageHandleStandardArgs)
 
 if (WIN32)
+    set(PROGRAMFILES_X86 "PROGRAMFILES(x86)")
+
 	# Find include files
 	find_path(
 		GLM_INCLUDE_DIR
 		NAMES glm/glm.hpp
 		PATHS
 		$ENV{PROGRAMFILES}/include
+        $ENV{${PROGRAMFILES_X86}}/include
+        $ENV{PROGRAMFILES}/glm/include
+        $ENV{${PROGRAMFILES_X86}}/glm/include
 		${GLM_ROOT_DIR}/include
 		DOC "The directory where glm/glm.hpp resides")
 else()

@@ -2,9 +2,9 @@
 #include "Drawable3DContainer.h"
 
 Drawable3DContainer::Drawable3DContainer()
-: pos({ 0, 0, 0 }), scale({ 1, 1, 1 }), children_(), parent_(nullptr), visible_(true)
+: pos({ 0, 0, 0 }), scale({ 1, 1, 1 }), children_(), parent_(nullptr)
 {
-
+    visible_ = true;
 }
 
 void Drawable3DContainer::addChild(std::shared_ptr<Drawable3DContainer> child)
