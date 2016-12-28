@@ -38,6 +38,10 @@ public:
 
     void generateHouse();
 
+    void setDimsAreRandom(bool dimsAreRandom);
+    bool areDimsRandom() const;
+    void reseedRandom() const;
+
 private:
     // Update function for AntTweakBar
     void twUpdate(SDL_Event& ev);
@@ -65,4 +69,6 @@ private:
     unsigned int seed_;
 	pb_hashmap* roomSpecs_;
     pb_sq_house_house_spec houseSpec_;
+
+    bool randomDimensions_;
 };

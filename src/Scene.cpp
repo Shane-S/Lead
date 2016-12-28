@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <random>
 #include <pb/util/hashmap/hash_utils.h>
 #include <pb/sq_house.h>
 #include "Scene.h"
@@ -8,11 +9,32 @@
 #include "FloorPlan.h"
 
 #define CAMERA_TOGGLE SDLK_c
+#define GENERATE_HOUSE_CAMERA_MODE SDLK_g
 
 void TW_CALL generateHouseCallback(void* scene)
 {
     Scene* scn = reinterpret_cast<Scene*>(scene);
     scn->generateHouse();
+}
+
+void TW_CALL reseedRand(void* scene)
+{
+    Scene* scn = reinterpret_cast<Scene*>(scene);
+    scn->reseedRandom();
+}
+
+void TW_CALL randomDimsSet(void const* value, void* scene)
+{
+    bool* val = (bool*)value;
+    Scene* scn = reinterpret_cast<Scene*>(scene);
+    scn->setDimsAreRandom(*val);
+}
+
+void TW_CALL randomDimsGet(void* value, void* scene)
+{
+    Scene* scn = reinterpret_cast<Scene*>(scene);
+    bool* val = (bool*)value;
+    *val = scn->areDimsRandom();
 }
 
 static char const* living_adj[] = {
@@ -81,9 +103,10 @@ Scene::Scene(SDL_Window* window)
     : drawList_(), shaders_(), window_(window),
     cam_({ SDL_GetWindowSurface(window)->w, SDL_GetWindowSurface(window)->h }, 45.f, 0.5f, 400.f, 8.f, 0.005f, "assets/reticle.png"),
     textures_(),
-    camFocused_(false), plan_(nullptr), building_(nullptr), seed_(0xDEADBEEF)
+    camFocused_(false), plan_(nullptr), building_(nullptr),
+    seed_(0xDEADBEEF), randomDimensions_(false)
 {
-    // --------------------------Initialise Room Specifications----------------------------//
+    //--------------------------Initialise Room Specifications----------------------------//
     specs[0].name = "Living room";
     specs[0].adjacent = &living_adj[0];
     specs[0].num_adjacent = sizeof(living_adj) / sizeof(char*);
@@ -155,10 +178,25 @@ Scene::Scene(SDL_Window* window)
     houseSpec_.height = 10.f;
 
     //--------------------------Tweak Bar Init----------------------------//
-	tweakBar_ = TwNewBar("libpb Params");
-	TwAddVarRW(tweakBar_, "Random Seed", TW_TYPE_UINT32, &seed_, " label='Random Seed' help='Seed value for the rand() function.' ");
-    TwAddVarRW(tweakBar_, "Number of Rooms", TW_TYPE_UINT32, &houseSpec_.num_rooms,
-               " label='Number of Rooms' help='Seed value for the rand() function.' ");
+	tweakBar_ = TwNewBar("libpb");
+	TwAddVarRW(tweakBar_, "random_seed", TW_TYPE_UINT32, &seed_, " label='Random Seed' help='Seed value for the rand() function.' ");
+    TwAddButton(tweakBar_, "reseed_btn", reseedRand, &seed_, " label='Re-seed rand()' help='Re-seed the rand() function with the current seed.' ");
+
+    TwAddVarRW(tweakBar_, "num_rooms", TW_TYPE_UINT32, &houseSpec_.num_rooms,
+        " label='Number of Rooms' help='Number of rooms to include in the generated house. ");
+    TwDefine(" libpb/num_rooms min=1 max=15 ");
+
+    TwAddVarRW(tweakBar_, "house_width", TW_TYPE_FLOAT, &houseSpec_.width,
+        " label='House Width' help='The generated house's width. ");
+    TwDefine(" libpb/house_width min=9 ");
+
+    TwAddVarRW(tweakBar_, "house_depth", TW_TYPE_FLOAT, &houseSpec_.height,
+        " label='House Depth' help='The generated house's depth (distance along the z-axis). ");
+    TwDefine(" libpb/house_depth min=9");
+
+    TwAddVarCB(tweakBar_, "random_dims", TW_TYPE_BOOLCPP, randomDimsSet, randomDimsGet, this,
+        " label='Toggle Random Dimensions' help='Decides whether to generate random dimensions or use the ones entered by the user.' ");
+
     TwAddButton(tweakBar_, "Generate", generateHouseCallback, this, " label='Generate House' help='Generates a new floor plan and house.' ");
 
     //--------------------------Create test model----------------------------//
@@ -288,6 +326,10 @@ bool Scene::update(float deltaTime)
                     twUpdate(ev);
                 }
             }
+            else if (ev.key.keysym.sym == GENERATE_HOUSE_CAMERA_MODE && camFocused_)
+            {
+                generateHouse();
+            }
             else if (!camFocused_)
             {
                 twUpdate(ev);
@@ -303,7 +345,7 @@ bool Scene::update(float deltaTime)
             break;
         }
     }
-
+ 
     if (camFocused_)
     {
         cam_.update(deltaTime);
@@ -350,6 +392,15 @@ void Scene::generateHouse()
         drawList_.pop_back();
     }
 
+    if (randomDimensions_)
+    {
+        unsigned int n1 = rand() % 43;
+        unsigned int n2 = rand() % 43;
+
+        houseSpec_.width = 9.f + (float)n1 / 2.f;
+        houseSpec_.height = 9.f + (float)n2 / 2.f;
+    }
+
     plan_ = std::shared_ptr<FloorPlan>(new FloorPlan(roomSpecs_, &houseSpec_));
     building_ = std::shared_ptr<Building>(new Building(*plan_, textures_));
 
@@ -357,4 +408,29 @@ void Scene::generateHouse()
 
     // Stop showing the test asset
     drawList_[0]->setVisible(false);
+}
+
+void Scene::setDimsAreRandom(bool dimsAreRandom)
+{
+    randomDimensions_ = dimsAreRandom;
+    if (randomDimensions_)
+    {
+        TwDefine(" libpb/house_width readonly=true ");
+        TwDefine(" libpb/house_depth readonly=true ");
+    }
+    else
+    {
+        TwDefine(" libpb/house_width readonly=false ");
+        TwDefine(" libpb/house_depth readonly=false ");
+    }
+}
+
+bool Scene::areDimsRandom() const
+{
+    return randomDimensions_;
+}
+
+void Scene::reseedRandom() const
+{
+    srand(seed_);
 }
