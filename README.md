@@ -14,3 +14,11 @@ Build instructions
 *   On OSX/Linux, you shouldn't have to do any other prep if you've installed the dependencies via package manager.
 *   Create a build directory and run cmake &lt;Lead download directory&gt; -G"&lt;The generator to use&gt;". For instance, if you created a directory Lead/build and want to generate Unix Makefiles, run cd build; cmake .. -G"Unix Makefils" to create the build system
 *   In the same directory, run make (or open your Visual Studio project, etc.) and build the project.
+
+Controlling the demo
+*   Use the C key to toggle between controlling the camera and interacting with the GUI
+*   While controlling the camera
+    *   Use the WASD keys to move forward, left, backwards, and right, respectively
+    *   Use the mouse to look around
+    *   Use the G key to generate a new floor plan with current parameters
+*   Adjust the different parameters to produce different plans
