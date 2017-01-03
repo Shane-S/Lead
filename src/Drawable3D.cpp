@@ -23,7 +23,7 @@ Drawable3D::Drawable3D(GLuint texture, const std::vector<VertexAttribute>& verte
         : Drawable3DContainer(), vertexSpec_(vertexSpec), numVerts_(numVertices), vertexSize_(0),
           texture_(texture), shouldDeleteTexture_(false)
 {
-    // Calculate the size of a vertex (not going to handle every single case since I'm not using most of them
+    // Calculate the size of a vertex (not going to handle every single case since I'm not using most of them)
     for (auto& attr : vertexSpec_) {
         switch (attr.type) {
             case GL_FLOAT:
@@ -90,7 +90,6 @@ void Drawable3D::draw(Scene const& scene)
     {
         glm::mat4 mvp(scene.getCamera().getViewProjectionMatrix() * getTransform());
         Shader const& modelShader = scene.getShaders().find("model")->second;
-
         modelShader.makeCurrent();
         glBindTexture(GL_TEXTURE_2D, texture_);
 

@@ -8,7 +8,7 @@ Shader::Shader(std::vector<ShaderAttribute> attrs, std::vector<std::string> unif
 	int result = makeProgram(&program_, vertShaderPath.c_str(), fragShaderPath.c_str(), &attrs[0], attrs.size());
 	if (result) {
 		std::stringstream stream;
-		stream << "Couldn't create shader program (makeProgram returned " << result << ", gl error was " << glewGetErrorString(glGetError()) << ").";
+		stream << "Couldn't create shader program (makeProgram returned " << result << ", gl error was " << glGetError() << ").";
 		throw stream.str();
 	}
 

@@ -9,15 +9,22 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "GLProgramUtils.h"
 
+// -4,  4, 0, 1,
+//  4, -4, 1, 0,
+//  4,  4, 1, 1,
+// -4, -4, 0, 0,
+//  4, -4, 1, 0,
+// -4,  4, 0, 1,
+
 // Vertices for the reticle to draw
 //  x     y     u     v
 static float rverts[] = {
-   -5.f, -5.f,  0.f,  1.f,
-    5.f,  5.f,  1.f,  0.f,
-   -5.f,  5.f,  0.f,  0.f,
-   -5.f, -5.f,  0.f,  1.f,
-    5.f, -5.f,  1.f,  1.f,
-    5.f,  5.f,  1.f,  0.f
+   -5.f, -5.f,  0.f,  0.f,
+    5.f,  5.f,  1.f,  1.f,
+   -5.f,  5.f,  0.f,  1.f,
+   -5.f, -5.f,  0.f,  0.f,
+    5.f, -5.f,  1.f,  0.f,
+    5.f,  5.f,  1.f,  1.f
 };
 
 VertexAttribute reticleSpec[] = {
@@ -44,9 +51,9 @@ Camera::Camera(glm::vec2 windowDims, float fov, float nearPlane, float farPlane,
 
     glGenBuffers(1, &reticleVBO_);
     glBindBuffer(GL_ARRAY_BUFFER, reticleVBO_);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(rverts), rverts, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(rverts), &rverts[0], GL_STATIC_DRAW);
     
-    setVertexAttributes(reticleSpec, 2);
+    setVertexAttributes(&reticleSpec[0], sizeof(reticleSpec) / sizeof(VertexAttribute));
     glBindVertexArray(0);
 }
 
@@ -114,14 +121,15 @@ void Camera::update(float deltaTime)
 void Camera::draw(Scene const& scene)
 {
     auto const& shaders = scene.getShaders();
-    shaders.find("ortho")->second.makeCurrent();
+    Shader const& ortho = shaders.find("ortho")->second;
 
-    glBindVertexArray(reticleVAO_);
+    ortho.makeCurrent();
+
     glBindTexture(GL_TEXTURE_2D, reticleTex_);
-
+    glBindVertexArray(reticleVAO_);
+    
     glm::mat4 ident(1.f);
-
-    glUniformMatrix4fv(shaders.find("ortho")->second.getUniforms().find("mvp")->second, 1, GL_FALSE, glm::value_ptr(reticleProj_));
+    glUniformMatrix4fv(ortho.getUniforms().find("mvp")->second, 1, GL_FALSE, glm::value_ptr(reticleProj_));
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }

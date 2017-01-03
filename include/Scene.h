@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <glad/glad.h>
 #include <AntTweakBar.h>
 #include <SDL2/SDL.h>
 #include <pb/util/hashmap/hashmap.h>

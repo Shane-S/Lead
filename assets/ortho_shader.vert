@@ -1,16 +1,15 @@
-#version 300 es
+#version 120
 
 precision mediump float;
 
 uniform mat4 mvp;
 
-layout (location = 0) in vec2 position;
-layout (location = 2) in vec2 texCoordIn;
+attribute vec2 position;
 
-// Get the information for the fragment shader
-smooth out vec2 texCoordOut;
+attribute vec2 texCoordIn;
+varying vec2 texCoordOut;
 
 void main() {
     texCoordOut = texCoordIn;
-    gl_Position = mvp * vec4(position.xy, 1.f, 1.0f);
+    gl_Position = mvp * vec4(position.xy, 1.0f, 1.0f);
 }

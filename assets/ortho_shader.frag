@@ -1,12 +1,11 @@
-#version 300 es
-precision mediump float;
+#version 120
 
 /* set up a uniform sampler2D to get texture */
 uniform sampler2D tex;
 
-smooth in vec2 texCoordOut;
-out vec4 colour;
+varying highp vec2 texCoordOut;
+
 void main()
 {
-    colour = texture2D(tex, texCoordOut);   
+    gl_FragColor = texture2D(tex, texCoordOut); //vec4(texCoordOut.s, texCoordOut.t, 1.0f, 1.0f); //
 }

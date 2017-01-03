@@ -3,7 +3,7 @@
 #include <map>
 #include <string>
 #include <pb/extrusion.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include "Drawable3DContainer.h"
 #include "FloorPlan.h"
 

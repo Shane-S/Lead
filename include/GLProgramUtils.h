@@ -1,7 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <GL/glu.h>
+#include <glad/glad.h>
 
 //  Adapted from VikingXII: https://github.com/LamePancake/VikingXII
 
@@ -9,10 +8,10 @@
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 typedef enum VertexAttribIndex {
-	VertexAttribPos,
-	VertexAttribNormal,
-	VertexAttribTexCoord0,
-	VertexAttribTexCoord1
+    VertexAttribPos,
+    VertexAttribNormal,
+    VertexAttribTexCoord0,
+    VertexAttribTexCoord1
 } VertexAttribIndex;
 
 /**

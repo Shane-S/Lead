@@ -2,11 +2,11 @@
 #include <Windows.h>
 #endif // _WIN32
 
+#include <glad/glad.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <AntTweakBar.h>
 #include <iostream>
-#include <GL/glew.h>
 #include "Scene.h"
 
 int main(int argc, char **argv) {
@@ -24,6 +24,10 @@ int main(int argc, char **argv) {
 		return 2;
 	}
 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    
 	SDL_Window* window = SDL_CreateWindow("Lead", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, SDL_WINDOW_OPENGL);
 	SDL_GLContext context = SDL_GL_CreateContext(window);
 
@@ -34,22 +38,24 @@ int main(int argc, char **argv) {
 		return 3;
 	}
 
-	// Initialise GLEW
-    glewExperimental = GL_TRUE;
-	GLenum result = glewInit();
-	if (result != GLEW_OK) {
-		std::cerr << "Error while initialising GLEW: " << glewGetErrorString(result) << std::endl;
-		std::cin.get();
-		return 4;
-	}
+	// Initialise GL
+    if (!gladLoadGL()) {
+        std::cerr << "Couldn't load GL!" << std::endl;
+        return 1;
+    }
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_TEXTURE_2D);
+
     glCullFace(GL_BACK);
-	glClearColor(50.f / 255, 50.f / 255, 50.f / 255, 1.f);
+    glFrontFace(GL_CCW);
+    glEnable(GL_CULL_FACE);
+
+    glEnable(GL_TEXTURE_2D);
+
+    glClearColor(50.f / 255, 50.f / 255, 50.f / 255, 1.f);
 
 	Scene* scene = new Scene(window);
 	Uint32 lastTicks = SDL_GetTicks();

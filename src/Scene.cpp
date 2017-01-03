@@ -1,6 +1,5 @@
 #include <SDL2/SDL.h>
 #include <iostream>
-#include <random>
 #include <pb/util/hashmap/hash_utils.h>
 #include <pb/sq_house.h>
 #include "Scene.h"
@@ -261,6 +260,7 @@ Scene::~Scene()
 
 void Scene::twUpdate(SDL_Event& ev)
 {
+    int err;
     switch (ev.type)
     {
     case SDL_KEYUP:
@@ -361,7 +361,6 @@ bool Scene::update(float deltaTime)
 
 void Scene::draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     for (auto& drawable : drawList_)
     {
         drawable->draw(*this);
